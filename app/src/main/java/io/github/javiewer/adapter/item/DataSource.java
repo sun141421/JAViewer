@@ -1,13 +1,20 @@
 package io.github.javiewer.adapter.item;
 
-import io.github.javiewer.JAViewer;
+import java.util.List;
 
 /**
  * Project: JAViewer
  */
 
 public class DataSource extends Linkable {
+
+    public static DataSource AVMO = new DataSource("AVMOO 日本", "https://avos.pw");
+    public static DataSource AVSO = new DataSource("AVSOX 日本无码", "https://avso.club");
+    public static DataSource AVXO = new DataSource("AVMEMO 欧美", "https://avxo.pw");
+
+
     public String name;
+    public List<String> legacies;
 
     public DataSource(String name, String baseUrl) {
         this.name = name;
@@ -23,12 +30,4 @@ public class DataSource extends Linkable {
         return name;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof DataSource) {
-            return JAViewer.Objects_equals(((DataSource) obj).getLink(), getLink());
-        }
-
-        return false;
-    }
 }

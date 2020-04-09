@@ -3,15 +3,14 @@ package io.github.javiewer.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.appcompat.widget.Toolbar;
 
 import io.github.javiewer.R;
 import io.github.javiewer.fragment.MovieListFragment;
 import io.github.javiewer.view.ViewUtil;
 
-public class MovieListActivity extends AppCompatActivity {
+public class MovieListActivity extends SecureActivity {
 
     public static Intent newIntent(Context context, String title, String link) {
         Intent intent = new Intent(context, MovieListActivity.class);
@@ -30,6 +29,7 @@ public class MovieListActivity extends AppCompatActivity {
 
         Bundle bundle = this.getIntent().getExtras();
 
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setTitle(bundle.getString("title"));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setElevation(ViewUtil.dpToPx(4));
@@ -45,13 +45,8 @@ public class MovieListActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

@@ -1,12 +1,15 @@
 package io.github.javiewer.adapter;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.RecyclerView;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,8 +46,7 @@ public class DownloadLinkAdapter extends ItemAdapter<DownloadLink, DownloadLinkA
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_download, parent, false);
-
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_download, parent, false);
         return new ViewHolder(v);
     }
 
@@ -54,7 +56,7 @@ public class DownloadLinkAdapter extends ItemAdapter<DownloadLink, DownloadLinkA
 
         holder.parse(link);
 
-        holder.mCard.setOnClickListener(new View.OnClickListener() {
+        holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!link.hasMagnetLink()) {
@@ -92,11 +94,30 @@ public class DownloadLinkAdapter extends ItemAdapter<DownloadLink, DownloadLinkA
         });
     }
 
-    public void onMagnetGet(String magnetLink) {
+    public void onMagnetGet(final String magnetLink) {
         if (!magnetLink.isEmpty()) {
-            ClipboardManager clip = (ClipboardManager) mParentActivity.getSystemService(Context.CLIPBOARD_SERVICE);
-            clip.setPrimaryClip(ClipData.newPlainText("magnet-link", magnetLink));
-            Toast.makeText(mParentActivity, "磁力链接：" + magnetLink + " 已复制到剪贴板", Toast.LENGTH_SHORT).show();
+            AlertDialog mDialog = new AlertDialog.Builder(mParentActivity)
+                    .setTitle("磁力链接")
+                    .setMessage(magnetLink)
+                    .setNeutralButton("复制到剪贴板", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ClipboardManager clip = (ClipboardManager) mParentActivity.getSystemService(Context.CLIPBOARD_SERVICE);
+                            clip.setPrimaryClip(ClipData.newPlainText("magnet-link", magnetLink));
+                            Toast.makeText(mParentActivity, "磁力链接：" + magnetLink + " 已复制到剪贴板", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setPositiveButton("打开", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(magnetLink));
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            mParentActivity.startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("取消", null)
+                    .show();
+
         } else {
             Toast.makeText(mParentActivity, "磁力链接获取失败", Toast.LENGTH_SHORT).show();
         }
@@ -113,18 +134,18 @@ public class DownloadLinkAdapter extends ItemAdapter<DownloadLink, DownloadLinkA
         @BindView(R.id.download_date)
         public TextView mTextDate;
 
-        @BindView(R.id.card_download)
-        public CardView mCard;
+        @BindView(R.id.layout_download)
+        public View mView;
+
+        public ViewHolder(View view) {
+            super(view);
+            ButterKnife.bind(this, view);
+        }
 
         public void parse(DownloadLink link) {
             mTextSize.setText(link.getSize());
             mTextTitle.setText(link.getTitle());
             mTextDate.setText(link.getDate());
-        }
-
-        public ViewHolder(View view) {
-            super(view);
-            ButterKnife.bind(this, view);
         }
     }
 }

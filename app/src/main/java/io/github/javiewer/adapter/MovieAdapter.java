@@ -3,21 +3,20 @@ package io.github.javiewer.adapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.RecyclerView;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
+import com.bumptech.glide.Glide;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.github.javiewer.JAViewer;
 import io.github.javiewer.R;
 import io.github.javiewer.activity.MovieActivity;
 import io.github.javiewer.adapter.item.Movie;
@@ -27,6 +26,7 @@ import io.github.javiewer.adapter.item.Movie;
  */
 public class MovieAdapter extends ItemAdapter<Movie, MovieAdapter.ViewHolder> {
 
+    protected boolean showIfHot = true;
     private Activity mParentActivity;
 
     public MovieAdapter(List<Movie> movies, Activity mParentActivity) {
@@ -59,9 +59,12 @@ public class MovieAdapter extends ItemAdapter<Movie, MovieAdapter.ViewHolder> {
             }
         });
 
-        ImageLoader.getInstance().displayImage(movie.getCoverUrl(), holder.mImageCover, JAViewer.DISPLAY_IMAGE_OPTIONS);
+        holder.mImageCover.setImageDrawable(null);
+        Glide.with(holder.mImageCover.getContext().getApplicationContext())
+                .load(movie.getCoverUrl())
+                .into(holder.mImageCover);
 
-        holder.mImageHot.setVisibility(movie.isHot() ? View.VISIBLE : View.INVISIBLE);
+        holder.mImageHot.setVisibility(movie.isHot() && showIfHot ? View.VISIBLE : View.GONE);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -84,16 +87,16 @@ public class MovieAdapter extends ItemAdapter<Movie, MovieAdapter.ViewHolder> {
         @BindView(R.id.card_movie)
         public CardView mCard;
 
-        public void parse(Movie movie) {
-            mTextCode.setText(movie.getCode());
-            mTextTitle.setText(movie.getTitle());
-            mTextDate.setText(movie.getDate());
-        }
-
         public ViewHolder(View view) {
             super(view);
 
             ButterKnife.bind(this, view);
+        }
+
+        public void parse(Movie movie) {
+            mTextCode.setText(movie.getCode());
+            mTextTitle.setText(movie.getTitle());
+            mTextDate.setText(movie.getDate());
         }
     }
 }

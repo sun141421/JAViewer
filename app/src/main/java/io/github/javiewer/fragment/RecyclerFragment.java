@@ -1,11 +1,11 @@
 package io.github.javiewer.fragment;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,24 +15,31 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.github.javiewer.R;
-import io.github.javiewer.listener.BasicOnScrollListener;
 import io.github.javiewer.view.ViewUtil;
+import io.github.javiewer.view.listener.BasicOnScrollListener;
 
 /**
  * Project: JAViewer
  */
 public abstract class RecyclerFragment<I, LM extends RecyclerView.LayoutManager> extends Fragment {
     @BindView(R.id.recycler_view)
-    RecyclerView mRecyclerView;
+    protected RecyclerView mRecyclerView;
 
     @BindView(R.id.refresh_layout)
-    SwipeRefreshLayout mRefreshLayout;
+    protected SwipeRefreshLayout mRefreshLayout;
+
+    /*@BindView(R.id.adView)
+    protected AdView mAdView;*/
 
     private SwipeRefreshLayout.OnRefreshListener mRefreshListener;
 
     private BasicOnScrollListener mScrollListener;
 
     private ArrayList<I> items = new ArrayList<>();
+
+    public RecyclerFragment() {
+        // Required empty public constructor
+    }
 
     protected void setRecyclerViewPadding(int dp) {
         this.mRecyclerView.setPadding(
@@ -43,25 +50,24 @@ public abstract class RecyclerFragment<I, LM extends RecyclerView.LayoutManager>
         );
     }
 
-    public RecyclerFragment() {
-        // Required empty public constructor
+    @SuppressWarnings("unchecked")
+    public LM getLayoutManager() {
+        return (LM) this.mRecyclerView.getLayoutManager();
     }
 
     public void setLayoutManager(LM mLayoutManager) {
         this.mRecyclerView.setLayoutManager(mLayoutManager);
     }
 
-    @SuppressWarnings("unchecked")
-    public LM getLayoutManager() {
-        return (LM) this.mRecyclerView.getLayoutManager();
+    public RecyclerView.Adapter getAdapter() {
+        if (this.mRecyclerView == null) {
+            return null;
+        }
+        return this.mRecyclerView.getAdapter();
     }
 
     public void setAdapter(RecyclerView.Adapter mAdapter) {
         this.mRecyclerView.setAdapter(mAdapter);
-    }
-
-    public RecyclerView.Adapter getAdapter() {
-        return this.mRecyclerView.getAdapter();
     }
 
     public ArrayList<I> getItems() {
@@ -69,14 +75,13 @@ public abstract class RecyclerFragment<I, LM extends RecyclerView.LayoutManager>
     }
 
     public void setItems(ArrayList<I> items) {
-        if (this.getItems().size() > 0) {
-            this.getItems().clear();
+        int size = getItems().size();
+        if (size > 0) {
+            getItems().clear();
+            getAdapter().notifyDataSetChanged();
         }
 
-        this.getItems().addAll(items);
-
-        mRecyclerView.stopScroll();
-        mRecyclerView.getRecycledViewPool().clear();
+        getItems().addAll(items);
         getAdapter().notifyDataSetChanged();
     }
 
@@ -117,12 +122,12 @@ public abstract class RecyclerFragment<I, LM extends RecyclerView.LayoutManager>
         return mScrollListener;
     }
 
-    public void setOnRefreshListener(SwipeRefreshLayout.OnRefreshListener listener) {
-        mRefreshLayout.setOnRefreshListener(mRefreshListener = listener);
-    }
-
     public SwipeRefreshLayout.OnRefreshListener getOnRefreshListener() {
         return mRefreshListener;
+    }
+
+    public void setOnRefreshListener(SwipeRefreshLayout.OnRefreshListener listener) {
+        mRefreshLayout.setOnRefreshListener(mRefreshListener = listener);
     }
 
     @Override
